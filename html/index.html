@@ -1,0 +1,108 @@
+<html>
+    <head>
+        <style type="text/css">
+            .content {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+
+            .messages {
+                flex-grow: 1;
+                overflow-y: scroll;
+            }
+
+            .controls {
+                display: flex;
+                flex-direction: row;
+                flex-shrink: 0;
+            }
+
+            .message_input {
+                flex-grow: 1;
+                margin-right: 0.5em;
+            }
+        </style>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+
+        <script>
+            var chat = function() {
+                var host = location.protocol + '//' + location.hostname;
+                $('.content.chat').show()
+
+                var mkli = function(contents) {
+                    var li = $('<li></li>');
+                    li.html(contents);
+                    return li;
+                };
+
+                var messages = $('#messages');
+                messages.get(0).auto_scroll = true;
+                messages.get(0).scroll = function() {
+                    if (this.auto_scroll) {
+                        this.scrollTop = this.scrollHeight - this.clientHeight;
+                    };
+                };
+
+                messages.scroll(function() {
+                    this.auto_scroll = this.scrollTop >= this.scrollHeight - this.clientHeight;
+                });
+
+                var source = new EventSource(host + ':10194/chat-spawner/');
+                source.onmessage = function(event) {
+                    messages.find('ul').append(mkli(event.data));
+                    messages.get(0).scroll();
+                };
+
+                var send_message = function(message, retried_count = 0) {
+                    var retry = function(xhr, status, error) {
+                        if (retried_count < 5) {
+                            console.log('retrying' + retried_count);
+                            send_message(message, retried_count + 1);
+                        }
+                    }
+
+                    $.ajax({
+                        url: host + ':10194/send-message/',
+                        method: 'POST',
+                        data: {'message': message},
+                        error: retry
+                    });
+                };
+
+                $('#send').click(function() {
+                    var input = $('#message_input');
+                    var message = input.val()
+
+                    send_message(message);
+
+                    input.val('');
+                    input.focus();
+                });
+
+                $('#message_input').keyup(function(event) {
+                    if (event.key == 'Enter'){
+                        $('#send').click();
+                    };
+                });
+            };
+
+            $(document).ready(function() {
+                chat();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="content chat" style="display: none;">
+            <div class="messages" id="messages">
+                <ul>
+                </ul>
+            </div>
+            <div class="controls">
+                <input name="message" class="message_input" id="message_input"/>
+                <button type="button" id="send">Send</button>
+            </div>
+        </div>
+    </body>
+</html>
