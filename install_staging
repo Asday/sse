@@ -1,0 +1,10 @@
+#!/bin/sh
+
+mkdir env
+virtualenv --python=python3.5 env
+
+. env/bin/activate
+
+pip install -r requirements_deploy.txt
+
+ln -s config_staging.py config.py
