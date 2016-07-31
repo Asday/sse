@@ -1,1 +1,1 @@
-host = "http://sse.righttobeoffensive.com/"
+host = "http://sse.righttobeoffensive.com"

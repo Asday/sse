@@ -1,1 +1,1 @@
-host = "http://k162.local/"
+host = "http://k162.local"
