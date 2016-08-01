@@ -7,24 +7,31 @@ from twisted.web.server import (
     Site,
 )
 
-import config
+from regex import prepathurl__protocol_host
 
-class ChatSpawner(Resource):
+class APICall(Resource):
+    def allow_host(self, request):
+        url = request.prePathURL()
+        protocol, host = prepathurl__protocol_host.match(url).groups()
+
+        request.setHeader("Access-Control-Allow-Origin", protocol + host)
+
+class ChatSpawner(APICall):
     isLeaf = True
 
     def render_GET(self, request):
         request.site.add_user(request)
 
         request.setHeader("Content-Type", "text/event-stream")
-        request.setHeader("Access-Control-Allow-Origin", config.host)
+        self.allow_host(request)
 
         return NOT_DONE_YET
 
-class SendMessage(Resource):
+class SendMessage(APICall):
     isLeaf = True
 
     def render_POST(self, request):
-        request.setHeader("Access-Control-Allow-Origin", config.host)
+        self.allow_host(request)
         request.site.send_message(request.args["message".encode()][0])
 
         return "".encode()
