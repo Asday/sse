@@ -56,7 +56,7 @@ class Server(Site):
         message = message.decode()
         for user in self._users[:]:
             try:
-                data = "data: {message}\r\n\r\n".format(**locals())
+                data = "data: {message}\n\n".format(**locals())
                 user.write(data.encode())
             except AttributeError:  # Disconnected
                 self._users.remove(user)
