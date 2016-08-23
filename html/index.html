@@ -37,22 +37,22 @@
                     return li;
                 };
 
-                var messages = $('#messages');
-                messages.get(0).auto_scroll = true;
-                messages.get(0).scroll = function() {
+                var messages_div = $(messages);
+                messages_div.get(0).auto_scroll = true;
+                messages_div.get(0).scroll = function() {
                     if (this.auto_scroll) {
                         this.scrollTop = this.scrollHeight - this.clientHeight;
                     };
                 };
 
-                messages.scroll(function() {
+                messages_div.scroll(function() {
                     this.auto_scroll = this.scrollTop >= this.scrollHeight - this.clientHeight;
                 });
 
                 var source = new EventSource(host + ':10194/chat-spawner/');
                 source.onmessage = function(event) {
-                    messages.find('ul').append(mkli(event.data));
-                    messages.get(0).scroll();
+                    messages_div.find('ul').append(mkli(event.data));
+                    messages_div.get(0).scroll();
                 };
 
                 var send_message = function(message, retried_count = 0) {
@@ -71,8 +71,8 @@
                     });
                 };
 
-                $('#send').click(function() {
-                    var input = $('#message_input');
+                $(send).click(function() {
+                    var input = $(message_input);
                     var message = input.val()
 
                     send_message(message);
@@ -81,11 +81,13 @@
                     input.focus();
                 });
 
-                $('#message_input').keyup(function(event) {
+                $(message_input).keyup(function(event) {
                     if (event.key == 'Enter'){
                         $('#send').click();
                     };
                 });
+
+                $(message_input).focus();
             };
 
             $(document).ready(function() {
